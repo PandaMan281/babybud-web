@@ -66,19 +66,20 @@
     }
 
     .logo-wrap {
-      width: 72px;
-      height: 72px;
+      width: 64px;
+      height: 64px;
       margin: 0 auto 12px;
       border-radius: 18px;
-      overflow: hidden;
-      box-shadow: 0 8px 20px rgba(61, 44, 41, 0.12);
+      background: linear-gradient(145deg, #ffe2d6 0%, #f2b9a4 100%);
+      display: grid;
+      place-items: center;
+      box-shadow: 0 8px 20px rgba(232, 135, 107, 0.22);
     }
 
-    .logo-wrap img {
-      width: 100%;
-      height: 100%;
+    .logo-wrap svg {
+      width: 34px;
+      height: 34px;
       display: block;
-      object-fit: cover;
     }
 
     .brand-title {
@@ -212,8 +213,12 @@
   <div class="page">
     <article class="card" role="main">
       <header class="card-header">
-        <div class="logo-wrap">
-          <img src="app-icon.png" width="72" height="72" alt="BabyBud">
+        <div class="logo-wrap" aria-hidden="true">
+          <svg viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17 28c-5.5-3.2-9-8.4-9-14.2C8 9.6 12 6 17 6s9 3.6 9 7.8c0 5.8-3.5 11-9 14.2Z" fill="#fff8f5" stroke="#e8876b" stroke-width="1.5"/>
+            <path d="M17 12v10M13 16h8" stroke="#e8876b" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="17" cy="8" r="2.2" fill="#e8876b"/>
+          </svg>
         </div>
         <p class="brand-title">BabyBud</p>
         <p class="brand-sub">豆豆 · 育兒陪伴</p>
@@ -239,7 +244,7 @@
           <h1>電郵已確認</h1>
           <p class="message">你的 BabyBud 帳號已成功建立，現在可以返回 app 開始使用。</p>
           <a class="btn" id="btn-open-app" href="babybud://auth-callback">打開 BabyBud</a>
-          <p class="hint">如果沒有自動開啟 app，請返回 BabyBud 手動登入。</p>
+          <p class="hint" id="success-hint">請點擊上方按鈕打開 BabyBud。若 Safari 無法開啟，請從主畫面打開 App，用已驗證的電郵登入即可。</p>
         </section>
 
         <!-- Error -->
@@ -269,11 +274,7 @@
 
   <script>
     (function () {
-      var APP_SCHEME = "babybud://auth-callback";
-      var OPEN_DELAY_MS = 1300;
-
-      var suffix = window.location.search + window.location.hash;
-      var deepLink = APP_SCHEME + suffix;
+      var APP_SCHEME_BASE = "babybud://auth-callback";
 
       var query = new URLSearchParams(window.location.search);
       var hashPart = window.location.hash.replace(/^#/, "");
@@ -291,6 +292,22 @@
           return value;
         }
       }
+
+      /// Merge ?query and #hash into one query string for the custom-scheme deep link.
+      /// Safari rejects some `babybud://...#fragment` URLs as invalid.
+      function buildDeepLink() {
+        var merged = new URLSearchParams();
+        query.forEach(function (value, key) {
+          merged.set(key, value);
+        });
+        hashQuery.forEach(function (value, key) {
+          merged.set(key, value);
+        });
+        var qs = merged.toString();
+        return qs ? APP_SCHEME_BASE + "?" + qs : APP_SCHEME_BASE;
+      }
+
+      var deepLink = buildDeepLink();
 
       function showPanel(id) {
         ["panel-loading", "panel-success", "panel-error"].forEach(function (panelId) {
@@ -321,22 +338,19 @@
         return;
       }
 
-      // Always show success UI first — never navigate away before render.
       showPanel("panel-success");
 
-      function tryOpenApp() {
-        // Use assign (not replace) so the success page stays in history if app does not open.
-        window.location.href = deepLink;
+      // Do not auto-navigate via window.location — iOS Safari often blocks
+      // custom-scheme redirects without a direct user tap on <a href>.
+      // The button uses native anchor navigation (no preventDefault).
+      if (!hasAuthPayload) {
+        var hint = document.getElementById("success-hint");
+        if (hint) {
+          hint.textContent =
+            "電郵應已完成驗證。請從主畫面打開 BabyBud，用註冊電郵登入即可。";
+        }
+        btnSuccess.textContent = "返回 BabyBud";
       }
-
-      if (hasAuthPayload) {
-        setTimeout(tryOpenApp, OPEN_DELAY_MS);
-      }
-
-      btnSuccess.addEventListener("click", function (event) {
-        event.preventDefault();
-        tryOpenApp();
-      });
     })();
   </script>
 </body>
