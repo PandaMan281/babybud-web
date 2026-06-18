@@ -237,9 +237,8 @@
             </svg>
           </div>
           <h1>電郵已確認</h1>
-          <p class="message">你的 BabyBud 帳號已成功建立，現在可以返回 app 開始使用。</p>
-          <a class="btn" id="btn-open-app" href="babybud://auth-callback">打開 BabyBud</a>
-          <p class="hint" id="success-hint">請點擊上方按鈕打開 BabyBud。若 Safari 無法開啟，請從主畫面打開 App，用已驗證的電郵登入即可。</p>
+          <p class="message">你的 BabyBud 帳號已成功建立，電郵驗證已完成。</p>
+          <p class="hint" id="success-hint">請關閉此頁，從主畫面打開 <strong>BabyBud</strong> App，用註冊電郵及密碼登入即可開始使用。</p>
         </section>
 
         <!-- Error -->
@@ -252,8 +251,7 @@
           </div>
           <h1>無法完成驗證</h1>
           <p class="message" id="error-message">此連結可能已失效或已被使用，請重新註冊或於 App 內登入後重試。</p>
-          <a class="btn" id="btn-open-app-error" href="babybud://auth-callback">返回 BabyBud</a>
-          <p class="hint">打開 App 後，可使用「登入」或「忘記密碼」繼續。</p>
+          <p class="hint">請從主畫面打開 BabyBud App，使用「登入」或「忘記密碼」繼續。</p>
         </section>
 
         <noscript>
@@ -269,8 +267,6 @@
 
   <script>
     (function () {
-      var APP_SCHEME_BASE = "babybud://auth-callback";
-
       var query = new URLSearchParams(window.location.search);
       var hashPart = window.location.hash.replace(/^#/, "");
       var hashQuery = new URLSearchParams(hashPart);
@@ -288,22 +284,6 @@
         }
       }
 
-      /// Merge ?query and #hash into one query string for the custom-scheme deep link.
-      /// Safari rejects some `babybud://...#fragment` URLs as invalid.
-      function buildDeepLink() {
-        var merged = new URLSearchParams();
-        query.forEach(function (value, key) {
-          merged.set(key, value);
-        });
-        hashQuery.forEach(function (value, key) {
-          merged.set(key, value);
-        });
-        var qs = merged.toString();
-        return qs ? APP_SCHEME_BASE + "?" + qs : APP_SCHEME_BASE;
-      }
-
-      var deepLink = buildDeepLink();
-
       function showPanel(id) {
         ["panel-loading", "panel-success", "panel-error"].forEach(function (panelId) {
           var el = document.getElementById(panelId);
@@ -317,14 +297,8 @@
         });
       }
 
-      var btnSuccess = document.getElementById("btn-open-app");
-      var btnError = document.getElementById("btn-open-app-error");
-      btnSuccess.href = deepLink;
-      btnError.href = deepLink;
-
       var authError = getParam("error");
       var errorDescription = decodeText(getParam("error_description"));
-      var hasAuthPayload = !!(getParam("code") || getParam("access_token"));
 
       if (authError) {
         showPanel("panel-error");
@@ -334,18 +308,6 @@
       }
 
       showPanel("panel-success");
-
-      // Do not auto-navigate via window.location — iOS Safari often blocks
-      // custom-scheme redirects without a direct user tap on <a href>.
-      // The button uses native anchor navigation (no preventDefault).
-      if (!hasAuthPayload) {
-        var hint = document.getElementById("success-hint");
-        if (hint) {
-          hint.textContent =
-            "電郵應已完成驗證。請從主畫面打開 BabyBud，用註冊電郵登入即可。";
-        }
-        btnSuccess.textContent = "返回 BabyBud";
-      }
     })();
   </script>
 </body>
