@@ -66,20 +66,19 @@
     }
 
     .logo-wrap {
-      width: 64px;
-      height: 64px;
+      width: 72px;
+      height: 72px;
       margin: 0 auto 12px;
       border-radius: 18px;
-      background: linear-gradient(145deg, #ffe2d6 0%, #f2b9a4 100%);
-      display: grid;
-      place-items: center;
-      box-shadow: 0 8px 20px rgba(232, 135, 107, 0.22);
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(61, 44, 41, 0.12);
     }
 
-    .logo-wrap svg {
-      width: 34px;
-      height: 34px;
+    .logo-wrap img {
+      width: 100%;
+      height: 100%;
       display: block;
+      object-fit: cover;
     }
 
     .brand-title {
@@ -213,12 +212,8 @@
   <div class="page">
     <article class="card" role="main">
       <header class="card-header">
-        <div class="logo-wrap" aria-hidden="true">
-          <svg viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M17 28c-5.5-3.2-9-8.4-9-14.2C8 9.6 12 6 17 6s9 3.6 9 7.8c0 5.8-3.5 11-9 14.2Z" fill="#fff8f5" stroke="#e8876b" stroke-width="1.5"/>
-            <path d="M17 12v10M13 16h8" stroke="#e8876b" stroke-width="1.8" stroke-linecap="round"/>
-            <circle cx="17" cy="8" r="2.2" fill="#e8876b"/>
-          </svg>
+        <div class="logo-wrap">
+          <img src="app-icon.png" width="72" height="72" alt="BabyBud">
         </div>
         <p class="brand-title">BabyBud</p>
         <p class="brand-sub">豆豆 · 育兒陪伴</p>
